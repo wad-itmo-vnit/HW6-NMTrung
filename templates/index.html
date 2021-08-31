@@ -1,0 +1,103 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Home Work 1</title>
+        <link rel="stylesheet" href="/static/css/style.css">
+      
+</head>
+<body>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="color: red;">
+                {%for message in messages %}
+                    <li>{{message}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <div id="intro">
+        <img src={{ avatar }} alt="Avatar" style= "width:150px; height:150px; padding: 1%;" >
+
+        <p style="text-align: left; margin: 0px 0px 0px 50px; width: 150px;">{{ text }}</p>
+
+        <form action="/logout" method="POST" style="margin-left: 90%;">
+            <input type="submit" value="Logout">
+        </form>
+        <br>
+        <form action="/changepwd" method="GET" style="margin-left:90%">
+            <input type="submit" value="Change Password">
+        </form>
+        <form action="/profile" method="get">
+            <input type="submit" value="Change avatar">
+        </form>
+        
+        <h1>Welcome to my world!</h1>
+        <p>"The place I will share is mostly meals I made myself when I am in Russia, and maybe some memories or trips &#128151;"</p>
+        
+    </div>
+
+    
+    <div id="me">
+        <p>More about me</p>
+        <a href="https://www.facebook.com/trungnm14498/" target="_blank"><img src="/static/images/fb.jpg" alt="Facebook"></a>
+        <a href="https://www.instagram.com/trungnm14498/" target="_blank"><img src="/static/images/insta.jpg" alt="Instagram"></a>
+        <a href="https://www.youtube.com/channel/UCNKX0lvgGCW9fwrXCRPgZng" target="_blank"><img src="/static/images/youtube.jpg" alt="Youtube"></a>
+    </div>
+
+    <div id="wrapper" class="index-gallery">
+        <div class="gallery img1">
+            <img src="/static/images/img01.jpg">
+            <div class="desc">Phở bò</div>
+        </div>
+
+        <div class="gallery img2">
+            <img src="/static/images/img02.jpg"></a>
+            <div class="desc">Mì ức vịt áp chảo</div>
+        </div>
+
+        <div class="gallery img3">
+            <img src="/static/images/img03.jpg"></a>
+            <div class="desc">Pad Thái</div>
+        </div>
+
+        <div class="gallery img4">
+            <img src="/static/images/img04.jpg"></a>
+            <div class="desc">Beef Steak</div>
+        </div>
+
+        <div class="gallery img5">
+            <img src="/static/images/img05.jpg"></a>
+            <div class="desc">Mì bò thập cẩm</div>
+        </div>
+
+        <div class="gallery img6">
+            <img src="/static/images/img06.jpg"></a>
+            <div class="desc">Cơm trộn Hàn Quắc</div>
+        </div>
+
+        <div class="gallery img7">
+            <img src="/static/images/img07.jpg"></a>
+            <div class="desc">Tạm biệt 750D 18-55mm</div>
+        </div>
+
+        <div class="gallery img9">
+            <img src="/static/images/img09.jpg"></a>
+            <div class="desc">Team con Hổ</div>
+        </div>
+
+        <div class="gallery img10">
+            <img src="/static/images/img10.jpg"></a>
+            <div class="desc">Đội bóng mùa Covid</div>
+        </div>
+
+        <div class="gallery img8">
+            <img src="/static/images/img08.jpg"></a>
+        </div>
+        
+    </div>
+
+    <script src="/static/js/gallery.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=, initial-scale=1.0">
+    <title>Change Password</title>
+</head>
+<body style="width: 600px; margin-top: 250px; margin-left: 35%">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul style="color: red;">
+                {%for message in messages %}
+                    <li>{{message}}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+    <div>
+        <form action="/changepwd" method="post">
+            <label for="cur_password" style="margin-right: 16px">Current Password</label>
+            <input type="password" name="cur_password">
+            <br>
+            <label for="new_password" style="margin-right:35px">New Password</label>
+            <input type="password" name="new_password">
+            <br>
+            <label for="password_confirm" style="margin-right: 11px">Confirm Password</label>
+            <input type="password" name="password_confirm">
+            <input type="submit" value="Confirm">
+        </form>
+        <br>
+        <span>You need to login again after changing password!!!</span>
+    </div>
+</body>
+</html>
