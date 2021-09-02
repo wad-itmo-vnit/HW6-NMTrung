@@ -17,12 +17,22 @@
         {% endif %}
     {% endwith %}
     
+    <img src="/uploads/{{avatar}}" alt="User's avatar" id="avatar" style="width: 300px; height: 300px; border-radius: 50px;">
+    <br>
     <form action="/profile" enctype=multipart/form-data method="post">
-        <img src={{ avatar }} alt="Avatar" style="width: 300px; height: 300px;"></img>
-        <input type=file name=file>
-        <input type=submit value=Upload>  
+        <input type="file" name="file" id="avatar_input" accept="image/*">
+        <input type="submit" value="Upload">  
     </form>
     <br>
     <span>Back to <a href="/">home page</a></span>
+    <script>
+        const image = document.querySelector("#avatar");
+        const input = document.querySelector("#avatar_input");
+
+        input.addEventListener("change", (e) => {
+            const selected_src = URL.createObjectURL(e.target.files[0])
+            image.src = selected_src;
+        })
+    </script>
 </body>
 </html>

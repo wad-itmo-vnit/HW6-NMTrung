@@ -1,18 +1,20 @@
 from flask import render_template, redirect, request, make_response, flash, send_from_directory
 from functools import wraps
 from werkzeug.utils import secure_filename
-from app import mongo, app
+from app import app, db, mongo
 from model.user import User
 
 import os
 import app_config
 
+def check_cookie(request):
+    return User.from_db(request.cookies.get('username')).authorize(request.cookies.get('token'))
+
 def login_required(func):
     @wraps(func)
     def login_func(*arg, **kwargs):
         try:
-            user = User.from_db(request.cookies.get('username'))
-            if user.authorize(request.cookies.get('token')):
+            if check_cookie(request):
                 return func(*arg, **kwargs)
         except:
             pass
@@ -25,8 +27,7 @@ def no_login(func):
     @wraps(func)
     def no_login_func(*arg, **kwargs):
         try:
-            username = User.from_db(request.cookies.get('username'))
-            if username.authorize(request.cookies.get('token')):
+            if check_cookie(request):
                 flash("You're already in!!!")
                 return redirect('/index')
         except:
@@ -43,7 +44,7 @@ def home():
 @login_required
 def index():
     username = request.cookies.get('username')
-    return render_template('index.html', avatar=mongo.db.users.find_one({"user":username})['avatar'], text=username)
+    return render_template('index.html', avatar=db.users.find_one({"user":username})['avatar'], text=username)
 
 @app.route('/login', methods=['GET', 'POST'])
 @no_login
@@ -54,7 +55,7 @@ def login():
     username = request.form.get('username')
     password = request.form.get('password')
 
-    if mongo.db.users.find_one({"user": username}) != None:
+    if db.users.find_one({"user": username}) != None:
         acc = User.from_db(username)
         if username == "drum":
             if acc.authenticate(password):
@@ -98,7 +99,7 @@ def register():
     username = request.form.get('username')
     password = request.form.get('password')
     password_confirm = request.form.get('password_confirm')
-    acc = mongo.db.users.find_one({"user":username})
+    acc = db.users.find_one({"user":username})
 
     if acc == None:
         if password == password_confirm:
@@ -145,32 +146,63 @@ def change_pwd():
 @login_required
 def drum():
     return render_template('drum.html')
+
+def allowed_extension(filename):
+    EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif']
+    extensions = filename.split('.')[-1].lower()
+    return extensions in EXTENSIONS
         
 @app.route('/profile', methods=['GET','POST'])
 @login_required
 def change_avt():
     username = request.cookies.get("username")
-    if request.method == 'GET':
-        link = mongo.db.users.find_one({"user": username})['avatar']
+    user = User.from_db(username)
+    link = user.get_avatar()
+    if request.method == 'GET':       
         return render_template("profile.html", avatar=link)
     else:
         avatar = request.files['file']
-        user = User.from_db(username)
         filename = secure_filename(avatar.filename)
+        if avatar == None:
+            flash("File not found")
+            return render_template("profile.html", avatar=link)
+
+        if filename == '':
+            flash("No file selected!!!")
+            return render_template("profile.html", avatar=link)
+
+        if not allowed_extension(filename):
+            flash("Invalid file extension")
+            return render_template("profile.html", avatar=link)
         
-        if filename != '':
-            avatar.save(os.path.join(app_config.UPLOAD_DIR, filename))
-            url = "./uploads/" + str(filename)
-            user.update_avatar(url)
-            flash("Avatar updated!!!")
-            return redirect("/")
-        else:
-            flash("Image not found")
-    return render_template("profile.html")
+        try:
+            user_avatar = user.get_avatar()
+            # Xóa avatar cũ
+            try:
+                if user_avatar != 'default.png':
+                    id = mongo.db.fs.files.find_one({"filename": user_avatar}).get('_id')
+                    mongo.db.fs.chunks.remove({'files_id': id})
+                    mongo.db.fs.files.remove({'_id': id})
+            except:
+                flash("Avatar is not in database!!!")
+
+            mongo.save_file(filename, avatar)
+            user.update_avatar(filename)
+        except:
+            flash("Error saving file!!!")
+            return redirect('/profile')
+        # avatar.save(os.path.join(app_config.UPLOAD_DIR, filename))
+        # user.update_avatar(filename)
+
+        flash("Avatar updated!!!")  
+        return render_template("index.html", avatar = filename, text=username)
 
 @app.route('/uploads/<filename>')
 def upload_avatar(filename):
-    return send_from_directory('./uploads/', filename)
+    if filename == 'default.png':
+        return app.send_static_file(filename)
+    #return send_from_directory(app_config.UPLOAD_DIR, filename)
+    return mongo.send_file(filename)
 
 if __name__ == '__main__':
     app.run(host='localhost', port = 5000, debug=True)
